@@ -19,7 +19,7 @@ public final class GratitudeStore: ObservableObject {
 	/// Most recent error from loadProducts() or purchase(). Surfaced by UI.
 	@Published public private(set) var lastError: GratitudeError? = nil
 
-	private var tiers: [TipTier] = []
+	private var tiers: [GiftTier] = []
 	private var trackCounts: Bool = false
 	private var listenerTask: Task<Void, Never>?
 
@@ -28,7 +28,7 @@ public final class GratitudeStore: ObservableObject {
 	deinit { listenerTask?.cancel() }
 
 	/// Called by Gratitude.configure(). Loads products + starts listener.
-	internal func start(tiers: [TipTier], trackCounts: Bool) {
+	internal func start(tiers: [GiftTier], trackCounts: Bool) {
 		self.tiers = tiers
 		self.trackCounts = trackCounts
 
@@ -57,7 +57,7 @@ public final class GratitudeStore: ObservableObject {
 	/// Initiate a purchase. Caller doesn't need to manage purchasingProduct
 	/// or finish() — both are handled here.
 	@discardableResult
-	public func purchase(tier: TipTier) async -> PurchaseResult {
+	public func purchase(tier: GiftTier) async -> PurchaseResult {
 		guard let product = products[tier.product] else {
 			let err = GratitudeError.productNotLoaded(tier.product)
 			self.lastError = err
@@ -74,7 +74,7 @@ public final class GratitudeStore: ObservableObject {
 				switch verification {
 				case .verified(let transaction):
 					await transaction.finish()
-					if trackCounts { incrementTipCount(for: tier.product) }
+					if trackCounts { incrementGiftCount(for: tier.product) }
 					Gratitude.shared.onPurchase?(tier)
 					return .success(tier: tier)
 				case .unverified(_, let verificationError):
@@ -107,7 +107,7 @@ public final class GratitudeStore: ObservableObject {
 		}
 	}
 
-	// MARK: Tip count tracking (UserDefaults; off unless config opts in)
+	// MARK: Gift count tracking (UserDefaults; off unless config opts in)
 
 	private static let totalKey = "gratitude.count.__total"
 	private func key(for product: String) -> String { "gratitude.count.\(product)" }
@@ -117,12 +117,12 @@ public final class GratitudeStore: ObservableObject {
 		return UserDefaults.standard.integer(forKey: key(for: product))
 	}
 
-	public func totalTipCount() -> Int {
+	public func totalGiftCount() -> Int {
 		guard trackCounts else { return 0 }
 		return UserDefaults.standard.integer(forKey: Self.totalKey)
 	}
 
-	private func incrementTipCount(for product: String) {
+	private func incrementGiftCount(for product: String) {
 		let ud = UserDefaults.standard
 		let perKey = key(for: product)
 		ud.set(ud.integer(forKey: perKey) + 1, forKey: perKey)

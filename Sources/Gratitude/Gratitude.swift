@@ -6,7 +6,7 @@ import UIKit
 import AppKit
 #endif
 
-/// Top-level façade. Configure once at app launch; drop a `TipButton`
+/// Top-level façade. Configure once at app launch; drop a `GiftButton`
 /// anywhere, or call `present()` from any code path to show the modal —
 /// no view-tree modifier required.
 @MainActor
@@ -15,7 +15,7 @@ public final class Gratitude: ObservableObject {
 	public static let shared = Gratitude()
 
 	/// Tiers in sort order. Empty until configure() is called.
-	public internal(set) var tiers: [TipTier] = []
+	public internal(set) var tiers: [GiftTier] = []
 
 	/// Caller-supplied content + behavior. nil until configure().
 	public internal(set) var config: GratitudeConfig?
@@ -27,30 +27,30 @@ public final class Gratitude: ObservableObject {
 
 	/// Optional callback fired after a successful tip. Use for analytics,
 	/// custom thank-yous, or unlocking cosmetic perks.
-	public var onPurchase: ((TipTier) -> Void)?
+	public var onPurchase: ((GiftTier) -> Void)?
 
 	private init() {
 		self.store = GratitudeStore()
 	}
 
 	/// Call exactly once at app launch (e.g. in your `App.init`).
-	public func configure(tiers: [TipTier], config: GratitudeConfig) {
+	public func configure(tiers: [GiftTier], config: GratitudeConfig) {
 		self.tiers = tiers.sorted {
 			if $0.sortOrder != $1.sortOrder { return $0.sortOrder < $1.sortOrder }
 			return $0.product < $1.product
 		}
 		self.config = config
-		store.start(tiers: self.tiers, trackCounts: config.trackTipCounts)
+		store.start(tiers: self.tiers, trackCounts: config.trackGiftCounts)
 	}
 
-	// MARK: Tip count read-out (only meaningful if config.trackTipCounts)
+	// MARK: Gift count read-out (only meaningful if config.trackGiftCounts)
 
-	public func tipCount(for product: String) -> Int {
+	public func giftCount(for product: String) -> Int {
 		store.tipCount(for: product)
 	}
 
-	public func totalTipCount() -> Int {
-		store.totalTipCount()
+	public func totalGiftCount() -> Int {
+		store.totalGiftCount()
 	}
 
 	// MARK: Programmatic presentation
@@ -115,7 +115,7 @@ public final class Gratitude: ObservableObject {
 				defer: false
 			)
 			window.contentViewController = host
-			window.title = config?.headline ?? "Send a Tip"
+			window.title = config?.headline ?? "Send a Gift"
 			window.center()
 			window.isReleasedWhenClosed = false
 			window.makeKeyAndOrderFront(nil)

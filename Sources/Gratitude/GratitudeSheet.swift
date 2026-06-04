@@ -55,7 +55,7 @@ public struct GratitudeSheet: View {
 					} else {
 						VStack(spacing: 12) {
 							ForEach(gratitude.tiers) { tier in
-								TipButton(product: tier.product)
+								GiftButton(product: tier.product)
 									.controlSize(.large)
 									.frame(maxWidth: .infinity)
 							}
@@ -63,8 +63,8 @@ public struct GratitudeSheet: View {
 						.padding(.top, 4)
 					}
 
-					if let config, config.trackTipCounts {
-						let total = gratitude.totalTipCount()
+					if let config, config.trackGiftCounts {
+						let total = gratitude.totalGiftCount()
 						if total > 0 {
 							Text("You've tipped \(total) time\(total == 1 ? "" : "s") — thank you 🙏")
 								.font(.caption)

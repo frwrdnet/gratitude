@@ -4,12 +4,12 @@ import SwiftUI
 /// the configured tier and StoreKit product.
 ///
 /// Use the default look:
-///     TipButton(product: tier.product)
+///     GiftButton(product: tier.product)
 ///
 /// Or pass any `ButtonStyle` you like:
-///     TipButton(product: tier.product, style: .borderedProminent)
-///     TipButton(product: tier.product, style: MyButtonStyle())
-public struct TipButton<S: ButtonStyle>: View {
+///     GiftButton(product: tier.product, style: .borderedProminent)
+///     GiftButton(product: tier.product, style: MyButtonStyle())
+public struct GiftButton<S: ButtonStyle>: View {
 
 	public let product: String
 	public let label: String?
@@ -42,20 +42,20 @@ public struct TipButton<S: ButtonStyle>: View {
 		}
 		.disabled(isDisabled)
 		.buttonStyle(style)
-		.alert("Tip failed", isPresented: errorAlert) {
+		.alert("Gift failed", isPresented: errorAlert) {
 			Button("OK") { alertText = nil }
 		} message: {
 			Text(alertText ?? "")
 		}
 	}
 
-	private var tier: TipTier? {
+	private var tier: GiftTier? {
 		Gratitude.shared.tiers.first(where: { $0.product == product })
 	}
 
 	private var displayName: String {
 		if let p = store.products[product] { return p.displayName }
-		return "Tip"
+		return "Gift"
 	}
 
 	private var priceText: String {
@@ -93,7 +93,7 @@ public struct TipButton<S: ButtonStyle>: View {
 
 // MARK: Convenience init — picks DefaultGratitudeButtonStyle when no style is passed
 
-public extension TipButton where S == DefaultGratitudeButtonStyle {
+public extension GiftButton where S == DefaultGratitudeButtonStyle {
 	init(product: String, label: String? = nil) {
 		self.init(product: product, label: label, style: DefaultGratitudeButtonStyle())
 	}

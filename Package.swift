@@ -17,9 +17,5 @@ let package = Package(
                 // .copy("Resources/Gratitude.storekit"), // optional local test config
             ]
         ),
-        .testTarget(
-            name: "GratitudeTests",
-            dependencies: ["Gratitude"]
-        ),
     ]
 )

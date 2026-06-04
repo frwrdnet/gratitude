@@ -1,7 +1,7 @@
 import Foundation
 
 /// One tap-to-tip option. Mirror an App Store Connect consumable IAP.
-public struct TipTier: Identifiable, Hashable, Sendable {
+public struct GiftTier: Identifiable, Hashable, Sendable {
 
 	/// The App Store Connect product identifier
 	/// (e.g. "net.frwrd.nabu.tip.small").

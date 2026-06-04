@@ -20,10 +20,10 @@ public struct GratitudeConfig: Sendable {
 
 	/// Track per-product and aggregate tip counts in UserDefaults.
 	/// OFF by default. When ON, the modal optionally shows total tips,
-	/// and `Gratitude.shared.tipCount(for:)` / `totalTipCount()` return
+	/// and `Gratitude.shared.tipCount(for:)` / `totalGiftCount()` return
 	/// real numbers. Counts are stored under
 	/// `gratitude.count.<product>` and `gratitude.count.__total`.
-	public var trackTipCounts: Bool
+	public var trackGiftCounts: Bool
 
 	public init(
 		headline: String,
@@ -31,13 +31,13 @@ public struct GratitudeConfig: Sendable {
 		imageName: String? = nil,
 		systemImageName: String? = nil,
 		accent: Color? = nil,
-		trackTipCounts: Bool = false
+		trackGiftCounts: Bool = false
 	) {
 		self.headline = headline
 		self.message = message
 		self.imageName = imageName
 		self.systemImageName = systemImageName
 		self.accent = accent
-		self.trackTipCounts = trackTipCounts
+		self.trackGiftCounts = trackGiftCounts
 	}
 }
