@@ -5,7 +5,7 @@ let package = Package(
     name: "Gratitude",
     platforms: [
         .iOS(.v18),
-        .macOS(.v15),
+        .macOS(.v13),
     ],
     products: [
         .library(name: "Gratitude", targets: ["Gratitude"]),
