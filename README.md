@@ -13,7 +13,7 @@ toss you a thank-you through StoreKit 2.
 Add to your `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/<you>/Gratitude.git", from: "0.1.0")
+.package(url: "https://github.com/frwrdnet/gratitude.git", from: "0.1.0")
 ```
 
 Then add `"Gratitude"` to the `dependencies` of any target that needs it.
