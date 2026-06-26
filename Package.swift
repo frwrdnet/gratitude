@@ -13,9 +13,7 @@ let package = Package(
     targets: [
         .target(
             name: "Gratitude",
-            resources: [
-                // .copy("Resources/Gratitude.storekit"), // optional local test config
-            ]
+            resources: []
         ),
     ]
 )
