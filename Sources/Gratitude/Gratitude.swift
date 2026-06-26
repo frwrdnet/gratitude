@@ -6,49 +6,9 @@ import UIKit
 import AppKit
 #endif
 
-// MARK: Per-call presentation overrides
-
-/// Optional per-presentation overrides for the Gratitude sheet. Any field
-/// left `nil` falls back to the value from `GratitudeConfig` (set at
-/// `configure(...)`), and from there to a sensible default.
-public struct GratitudeOverrides: Sendable {
-	/// Navigation-bar / window title. `nil` = empty.
-	public var navigationTitle: String?
-	/// SF Symbol name to render as the artwork.
-	public var systemImageName: String?
-	/// Asset name in the caller's bundle (takes precedence over SF Symbol).
-	public var imageName: String?
-	/// Emoji (takes precedence over Image Name and SF Symbol).
-	public var emoji: String?
-	/// Headline shown bold below the artwork.
-	public var headline: String?
-	/// Body copy shown below the headline.
-	public var message: String?
-	/// Optional extra paragraph rendered below the tip buttons.
-	public var footer: String?
-
-	public init(
-		navigationTitle: String? = nil,
-		systemImageName: String? = nil,
-		imageName: String? = nil,
-		emoji: String? = nil,
-		headline: String? = nil,
-		message: String? = nil,
-		footer: String? = nil
-	) {
-		self.navigationTitle = navigationTitle
-		self.systemImageName = systemImageName
-		self.imageName = imageName
-		self.emoji = emoji
-		self.headline = headline
-		self.message = message
-		self.footer = footer
-	}
-}
-
-/// Top-level façade. Configure once at app launch; drop a `GiftButton`
-/// anywhere, or call `present()` from any code path to show the modal —
-/// no view-tree modifier required.
+/// Top-level façade. Configure once at app launch (or rely on `.default`);
+/// drop a `GiftButton` anywhere, or call `present()` from any code path to
+/// show the modal — no view-tree modifier required.
 @MainActor
 public final class Gratitude: ObservableObject {
 
@@ -57,7 +17,8 @@ public final class Gratitude: ObservableObject {
 	/// Tiers in sort order. Empty until configure() is called.
 	public internal(set) var tiers: [GiftTier] = []
 
-	/// Caller-supplied content + behavior. nil until configure().
+	/// Caller-supplied content + behavior. nil until configure() is called;
+	/// in that case the sheet falls back entirely to `GratitudeConfig.default`.
 	public internal(set) var config: GratitudeConfig?
 
 	/// The StoreKit 2 wrapper. Public so callers can observe loading /
@@ -74,13 +35,14 @@ public final class Gratitude: ObservableObject {
 	}
 
 	/// Call exactly once at app launch (e.g. in your `App.init`).
-	public func configure(tiers: [GiftTier], config: GratitudeConfig) {
+	/// Any field left nil in `config` falls back to `GratitudeConfig.default`.
+	public func configure(tiers: [GiftTier], config: GratitudeConfig = GratitudeConfig()) {
 		self.tiers = tiers.sorted {
 			if $0.sortOrder != $1.sortOrder { return $0.sortOrder < $1.sortOrder }
 			return $0.product < $1.product
 		}
 		self.config = config
-		store.start(tiers: self.tiers, trackCounts: config.trackGiftCounts)
+		store.start(tiers: self.tiers, trackCounts: config.trackGiftCounts ?? false)
 	}
 
 	// MARK: Gift count read-out (only meaningful if config.trackGiftCounts)
@@ -105,23 +67,23 @@ public final class Gratitude: ObservableObject {
 	/// On iOS the sheet uses system detents, so `width`/`height` are
 	/// ignored.
 	///
-	/// `overrides` lets you customise the sheet's nav title, icon,
-	/// headline, body text, and an optional footer paragraph per-call.
-	/// Any field left `nil` falls back to the global config.
+	/// `config` is a per-call override. Any field left nil falls back to the
+	/// global config (set via `configure(...)`), and from there to
+	/// `GratitudeConfig.default`.
 	public func present(
 		width: CGFloat? = nil,
 		height: CGFloat? = nil,
-		overrides: GratitudeOverrides? = nil
+		config: GratitudeConfig? = nil
 	) {
 		#if os(iOS)
-		presentOnIOS(overrides: overrides)
+		presentOnIOS(config: config)
 		#elseif os(macOS)
-		presentOnMacOS(width: width, height: height, overrides: overrides)
+		presentOnMacOS(width: width, height: height, config: config)
 		#endif
 	}
 
 	#if os(iOS)
-	private func presentOnIOS(overrides: GratitudeOverrides?) {
+	private func presentOnIOS(config: GratitudeConfig?) {
 		guard let scene = UIApplication.shared.connectedScenes
 			.compactMap({ $0 as? UIWindowScene })
 			.first(where: { $0.activationState == .foregroundActive })
@@ -133,10 +95,11 @@ public final class Gratitude: ObservableObject {
 		var top: UIViewController? = window.rootViewController
 		while let presented = top?.presentedViewController { top = presented }
 
-		let host = UIHostingController(rootView: GratitudeSheet(overrides: overrides))
-		host.rootView = GratitudeSheet(overrides: overrides) { [weak host] in
-			host?.dismiss(animated: true)
-		}
+		let host = UIHostingController(rootView: GratitudeSheet(config: config))
+		host.rootView = GratitudeSheet(
+			config: config,
+			onDismiss: { [weak host] in host?.dismiss(animated: true) }
+		)
 		host.modalPresentationStyle = .pageSheet
 		if let sheet = host.sheetPresentationController {
 			sheet.detents = [.large()]
@@ -147,14 +110,15 @@ public final class Gratitude: ObservableObject {
 	#endif
 
 	#if os(macOS)
-	private func presentOnMacOS(width: CGFloat?, height: CGFloat?, overrides: GratitudeOverrides?) {
+	private func presentOnMacOS(width: CGFloat?, height: CGFloat?, config: GratitudeConfig?) {
 		let w = width ?? 440
 		let h = height ?? 540
 
-		let host = NSHostingController(rootView: GratitudeSheet(overrides: overrides))
-		host.rootView = GratitudeSheet(overrides: overrides) { [weak host] in
-			host?.dismiss(nil)
-		}
+		let host = NSHostingController(rootView: GratitudeSheet(config: config))
+		host.rootView = GratitudeSheet(
+			config: config,
+			onDismiss: { [weak host] in host?.dismiss(nil) }
+		)
 		host.preferredContentSize = NSSize(width: w, height: h)
 
 		if let contentVC = NSApp.keyWindow?.contentViewController {
@@ -167,10 +131,10 @@ public final class Gratitude: ObservableObject {
 				defer: false
 			)
 			window.contentViewController = host
-			window.title = overrides?.navigationTitle
-				?? overrides?.headline
-				?? config?.headline
-				?? "Send a Gift"
+			let resolved = (config ?? GratitudeConfig())
+				.merged(over: self.config ?? GratitudeConfig())
+				.resolved
+			window.title = resolved.navigationTitle ?? "Send a tip"
 			window.center()
 			window.isReleasedWhenClosed = false
 			window.makeKeyAndOrderFront(nil)

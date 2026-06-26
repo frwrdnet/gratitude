@@ -11,14 +11,14 @@ public struct GratitudeSheet: View {
 	@ObservedObject private var gratitude = Gratitude.shared
 	@Environment(\.dismiss) private var environmentDismiss
 
+	private let configOverride: GratitudeConfig?
 	private let onDismiss: (() -> Void)?
-	private let overrides: GratitudeOverrides?
 
 	public init(
-		overrides: GratitudeOverrides? = nil,
+		config: GratitudeConfig? = nil,
 		onDismiss: (() -> Void)? = nil
 	) {
-		self.overrides = overrides
+		self.configOverride = config
 		self.onDismiss = onDismiss
 	}
 
@@ -31,11 +31,11 @@ public struct GratitudeSheet: View {
 	}
 
 	public var body: some View {
-		let config = gratitude.config
-		let displayHeadline = overrides?.headline ?? config?.headline ?? "Support development"
-		let displayMessage  = overrides?.message  ?? config?.message  ?? ""
-		let navTitle        = overrides?.navigationTitle ?? ""
-		let footer          = overrides?.footer
+		// Per-call override wins per-field; missing fields fall through to the
+		// global config from configure(); missing there fall through to .default.
+		let config = (configOverride ?? GratitudeConfig())
+			.merged(over: gratitude.config ?? GratitudeConfig())
+			.resolved
 
 		NavigationStack {
 			VStack {
@@ -45,10 +45,10 @@ public struct GratitudeSheet: View {
 					artwork(config: config)
 
 					VStack(spacing: 8) {
-						Text(displayHeadline)
+						Text(config.headline ?? "")
 							.font(.title2.weight(.semibold))
 							.multilineTextAlignment(.center)
-						Text(displayMessage)
+						Text(config.message ?? "")
 							.font(.body)
 							.foregroundStyle(.secondary)
 							.multilineTextAlignment(.center)
@@ -72,7 +72,7 @@ public struct GratitudeSheet: View {
 						.padding(.top, 4)
 					}
 
-					if let footer {
+					if let footer = config.footer {
 						Text(footer)
 							.font(.callout)
 							.foregroundStyle(.secondary)
@@ -80,7 +80,7 @@ public struct GratitudeSheet: View {
 							.fixedSize(horizontal: false, vertical: true)
 					}
 
-					if let config, config.trackGiftCounts {
+					if config.trackGiftCounts == true {
 						let total = gratitude.totalGiftCount()
 						if total > 0 {
 							Text("You've tipped \(total) time\(total == 1 ? "" : "s") — thank you 🙏")
@@ -110,7 +110,7 @@ public struct GratitudeSheet: View {
 			.navigationBarTitleDisplayMode(.inline)
 			#endif
 			#if os(macOS)
-			.navigationTitle(navTitle)
+			.navigationTitle(config.navigationTitle ?? "")
 			#endif
 		}
 		#if os(macOS)
@@ -119,25 +119,25 @@ public struct GratitudeSheet: View {
 	}
 
 	@ViewBuilder
-	private func artwork(config: GratitudeConfig?) -> some View {
-		if let emoji = overrides?.emoji {
-			Text(emoji)
-				.font(.system(size: 64))
-				.padding(.bottom, 4)
-		} else if let name = overrides?.imageName ?? config?.imageName {
+	private func artwork(config: GratitudeConfig) -> some View {
+		if let name = config.imageName {
 			Image(name)
 				.resizable()
 				.scaledToFit()
 				.frame(height: 96)
-		} else if let symbol = overrides?.systemImageName ?? config?.systemImageName {
+		} else if let symbol = config.systemImageName {
 			Image(systemName: symbol)
 				.font(.system(size: 56, weight: .regular))
-				.foregroundStyle(config?.accent ?? .accentColor)
+				.foregroundStyle(config.accent ?? .accentColor)
+				.padding(.bottom, 4)
+		} else if let emoji = config.emoji {
+			Text(emoji)
+				.font(.system(size: 64))
 				.padding(.bottom, 4)
 		} else {
 			Image(systemName: "heart.fill")
 				.font(.system(size: 56, weight: .regular))
-				.foregroundStyle(config?.accent ?? .accentColor)
+				.foregroundStyle(config.accent ?? .accentColor)
 				.padding(.bottom, 4)
 		}
 	}
