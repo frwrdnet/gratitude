@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "Gratitude",
     platforms: [
-        .iOS(.v18),
+        .iOS(.v16),
         .macOS(.v13),
     ],
     products: [
@@ -13,7 +13,9 @@ let package = Package(
     targets: [
         .target(
             name: "Gratitude",
-            resources: []
+            resources: [
+                .copy("Resources/Gratitude.storekit"), // optional local test config
+            ]
         ),
     ]
 )

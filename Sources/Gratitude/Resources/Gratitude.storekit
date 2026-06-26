@@ -1,0 +1,90 @@
+{
+  "identifier" : "AB1234CD-1234-5678-90AB-CDEF12345678",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "0.99",
+      "familyShareable" : false,
+      "internalID" : "0001AAAA-0000-0000-0000-000000000001",
+      "localizations" : [
+        {
+          "description" : "A coffee-sized thank you.",
+          "displayName" : "Tiny gift",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.example.app.gifts.tiny",
+      "referenceName" : "Tiny gift",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "2.99",
+      "familyShareable" : false,
+      "internalID" : "0002AAAA-0000-0000-0000-000000000002",
+      "localizations" : [
+        {
+          "description" : "Lunch-sized appreciation.",
+          "displayName" : "Small gift",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.example.app.gifts.small",
+      "referenceName" : "Small gift",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "4.99",
+      "familyShareable" : false,
+      "internalID" : "0003AAAA-0000-0000-0000-000000000003",
+      "localizations" : [
+        {
+          "description" : "A bento-box of gratitude.",
+          "displayName" : "Medium gift",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.example.app.gifts.medium",
+      "referenceName" : "Medium gift",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "9.99",
+      "familyShareable" : false,
+      "internalID" : "0004AAAA-0000-0000-0000-000000000004",
+      "localizations" : [
+        {
+          "description" : "Confetti-cannon thank you.",
+          "displayName" : "Large gift",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.example.app.gifts.large",
+      "referenceName" : "Large gift",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "",
+    "_developerTeamID" : "",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 0,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      { "current" : null, "enabled" : false, "name" : "Load Products" },
+      { "current" : null, "enabled" : false, "name" : "Purchase" },
+      { "current" : null, "enabled" : false, "name" : "Verification" },
+      { "current" : null, "enabled" : false, "name" : "App Store Sync" },
+      { "current" : null, "enabled" : false, "name" : "Subscription Status" },
+      { "current" : null, "enabled" : false, "name" : "App Transaction" },
+      { "current" : null, "enabled" : false, "name" : "Manage Subscriptions Sheet" },
+      { "current" : null, "enabled" : false, "name" : "Refund Request Sheet" },
+      { "current" : null, "enabled" : false, "name" : "Offer Code Redeem Sheet" }
+    ]
+  },
+  "subscriptionGroups" : [],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}
