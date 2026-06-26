@@ -56,16 +56,19 @@ public final class Gratitude: ObservableObject {
 	// MARK: Programmatic presentation
 
 	/// Present the tip-jar modal from anywhere in your app.
-	/// iOS: presents a `UIHostingController` as a half-sheet over the
-	/// topmost view controller.
-	/// macOS: presents an `NSHostingController` as a sheet on the key
-	/// window, or opens a small standalone window if no key window is
-	/// available.
-	public func present() {
+	///
+	/// On macOS, `width`/`height` set the size of the sheet (or the
+	/// standalone-window fallback). Pass `nil` to use the defaults
+	/// of 440×480. Note that `GratitudeSheet` enforces a minimum of
+	/// 380×360 internally, so smaller values are clamped up.
+	///
+	/// On iOS the sheet uses system detents, so `width`/`height` are
+	/// ignored.
+	public func present(width: CGFloat? = nil, height: CGFloat? = nil) {
 		#if os(iOS)
 		presentOnIOS()
 		#elseif os(macOS)
-		presentOnMacOS()
+		presentOnMacOS(width: width, height: height)
 		#endif
 	}
 
@@ -99,17 +102,22 @@ public final class Gratitude: ObservableObject {
 	#endif
 
 	#if os(macOS)
-	private func presentOnMacOS() {
+	private func presentOnMacOS(width: CGFloat?, height: CGFloat?) {
+		let w = width ?? 440
+		let h = height ?? 540
+
 		let host = NSHostingController(rootView: GratitudeSheet())
 		host.rootView = GratitudeSheet { [weak host] in
 			host?.dismiss(nil)
 		}
+		host.preferredContentSize = NSSize(width: w, height: h)
+
 		if let contentVC = NSApp.keyWindow?.contentViewController {
 			contentVC.presentAsSheet(host)
 		} else {
 			// No key window — open a small standalone window instead.
 			let window = NSWindow(
-				contentRect: NSRect(x: 0, y: 0, width: 440, height: 480),
+				contentRect: NSRect(x: 0, y: 0, width: w, height: h),
 				styleMask: [.titled, .closable, .fullSizeContentView],
 				backing: .buffered,
 				defer: false
