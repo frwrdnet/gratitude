@@ -120,15 +120,16 @@ public struct GratitudeSheet: View {
 
 	@ViewBuilder
 	private func artwork(config: GratitudeConfig?) -> some View {
-		let resolvedImageName  = overrides?.imageName       ?? config?.imageName
-		let resolvedSystemName = overrides?.systemImageName ?? config?.systemImageName
-
-		if let name = resolvedImageName {
+		if let emoji = overrides?.emoji {
+			Text(emoji)
+				.font(.system(size: 64))
+				.padding(.bottom, 4)
+		} else if let name = overrides?.imageName ?? config?.imageName {
 			Image(name)
 				.resizable()
 				.scaledToFit()
 				.frame(height: 96)
-		} else if let symbol = resolvedSystemName {
+		} else if let symbol = overrides?.systemImageName ?? config?.systemImageName {
 			Image(systemName: symbol)
 				.font(.system(size: 56, weight: .regular))
 				.foregroundStyle(config?.accent ?? .accentColor)

@@ -18,6 +18,8 @@ public struct GratitudeOverrides: Sendable {
 	public var systemImageName: String?
 	/// Asset name in the caller's bundle (takes precedence over SF Symbol).
 	public var imageName: String?
+	/// Emoji (takes precedence over Image Name and SF Symbol).
+	public var emoji: String?
 	/// Headline shown bold below the artwork.
 	public var headline: String?
 	/// Body copy shown below the headline.
@@ -29,6 +31,7 @@ public struct GratitudeOverrides: Sendable {
 		navigationTitle: String? = nil,
 		systemImageName: String? = nil,
 		imageName: String? = nil,
+		emoji: String? = nil,
 		headline: String? = nil,
 		message: String? = nil,
 		footer: String? = nil
@@ -36,6 +39,7 @@ public struct GratitudeOverrides: Sendable {
 		self.navigationTitle = navigationTitle
 		self.systemImageName = systemImageName
 		self.imageName = imageName
+		self.emoji = emoji
 		self.headline = headline
 		self.message = message
 		self.footer = footer
