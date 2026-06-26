@@ -6,6 +6,42 @@ import UIKit
 import AppKit
 #endif
 
+// MARK: Per-call presentation overrides
+
+/// Optional per-presentation overrides for the Gratitude sheet. Any field
+/// left `nil` falls back to the value from `GratitudeConfig` (set at
+/// `configure(...)`), and from there to a sensible default.
+public struct GratitudeOverrides: Sendable {
+	/// Navigation-bar / window title. `nil` = empty.
+	public var navigationTitle: String?
+	/// SF Symbol name to render as the artwork.
+	public var systemImageName: String?
+	/// Asset name in the caller's bundle (takes precedence over SF Symbol).
+	public var imageName: String?
+	/// Headline shown bold below the artwork.
+	public var headline: String?
+	/// Body copy shown below the headline.
+	public var message: String?
+	/// Optional extra paragraph rendered below the tip buttons.
+	public var footer: String?
+
+	public init(
+		navigationTitle: String? = nil,
+		systemImageName: String? = nil,
+		imageName: String? = nil,
+		headline: String? = nil,
+		message: String? = nil,
+		footer: String? = nil
+	) {
+		self.navigationTitle = navigationTitle
+		self.systemImageName = systemImageName
+		self.imageName = imageName
+		self.headline = headline
+		self.message = message
+		self.footer = footer
+	}
+}
+
 /// Top-level façade. Configure once at app launch; drop a `GiftButton`
 /// anywhere, or call `present()` from any code path to show the modal —
 /// no view-tree modifier required.
@@ -59,24 +95,29 @@ public final class Gratitude: ObservableObject {
 	///
 	/// On macOS, `width`/`height` set the size of the sheet (or the
 	/// standalone-window fallback). Pass `nil` to use the defaults
-	/// of 440×480. Note that `GratitudeSheet` enforces a minimum of
+	/// of 440×540. Note that `GratitudeSheet` enforces a minimum of
 	/// 380×360 internally, so smaller values are clamped up.
 	///
 	/// On iOS the sheet uses system detents, so `width`/`height` are
 	/// ignored.
-	public func present(width: CGFloat? = nil, height: CGFloat? = nil) {
+	///
+	/// `overrides` lets you customise the sheet's nav title, icon,
+	/// headline, body text, and an optional footer paragraph per-call.
+	/// Any field left `nil` falls back to the global config.
+	public func present(
+		width: CGFloat? = nil,
+		height: CGFloat? = nil,
+		overrides: GratitudeOverrides? = nil
+	) {
 		#if os(iOS)
-		presentOnIOS()
+		presentOnIOS(overrides: overrides)
 		#elseif os(macOS)
-		presentOnMacOS(width: width, height: height)
+		presentOnMacOS(width: width, height: height, overrides: overrides)
 		#endif
 	}
 
 	#if os(iOS)
-	private func presentOnIOS() {
-		// Find the foreground-active scene's key window, then walk up
-		// any presented controllers to land on top of existing modals
-		// (Settings sheet, share sheet, etc.).
+	private func presentOnIOS(overrides: GratitudeOverrides?) {
 		guard let scene = UIApplication.shared.connectedScenes
 			.compactMap({ $0 as? UIWindowScene })
 			.first(where: { $0.activationState == .foregroundActive })
@@ -88,13 +129,13 @@ public final class Gratitude: ObservableObject {
 		var top: UIViewController? = window.rootViewController
 		while let presented = top?.presentedViewController { top = presented }
 
-		let host = UIHostingController(rootView: GratitudeSheet())
-		host.rootView = GratitudeSheet { [weak host] in
+		let host = UIHostingController(rootView: GratitudeSheet(overrides: overrides))
+		host.rootView = GratitudeSheet(overrides: overrides) { [weak host] in
 			host?.dismiss(animated: true)
 		}
 		host.modalPresentationStyle = .pageSheet
 		if let sheet = host.sheetPresentationController {
-			sheet.detents = [.large()] //[.medium(), .large()]
+			sheet.detents = [.large()]
 			sheet.prefersGrabberVisible = true
 		}
 		top?.present(host, animated: true)
@@ -102,12 +143,12 @@ public final class Gratitude: ObservableObject {
 	#endif
 
 	#if os(macOS)
-	private func presentOnMacOS(width: CGFloat?, height: CGFloat?) {
+	private func presentOnMacOS(width: CGFloat?, height: CGFloat?, overrides: GratitudeOverrides?) {
 		let w = width ?? 440
 		let h = height ?? 540
 
-		let host = NSHostingController(rootView: GratitudeSheet())
-		host.rootView = GratitudeSheet { [weak host] in
+		let host = NSHostingController(rootView: GratitudeSheet(overrides: overrides))
+		host.rootView = GratitudeSheet(overrides: overrides) { [weak host] in
 			host?.dismiss(nil)
 		}
 		host.preferredContentSize = NSSize(width: w, height: h)
@@ -115,7 +156,6 @@ public final class Gratitude: ObservableObject {
 		if let contentVC = NSApp.keyWindow?.contentViewController {
 			contentVC.presentAsSheet(host)
 		} else {
-			// No key window — open a small standalone window instead.
 			let window = NSWindow(
 				contentRect: NSRect(x: 0, y: 0, width: w, height: h),
 				styleMask: [.titled, .closable, .fullSizeContentView],
@@ -123,7 +163,10 @@ public final class Gratitude: ObservableObject {
 				defer: false
 			)
 			window.contentViewController = host
-			window.title = config?.headline ?? "Send a Gift"
+			window.title = overrides?.navigationTitle
+				?? overrides?.headline
+				?? config?.headline
+				?? "Send a Gift"
 			window.center()
 			window.isReleasedWhenClosed = false
 			window.makeKeyAndOrderFront(nil)

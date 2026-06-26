@@ -12,9 +12,14 @@ public struct GratitudeSheet: View {
 	@Environment(\.dismiss) private var environmentDismiss
 
 	private let onDismiss: (() -> Void)?
+	private let overrides: GratitudeOverrides?
 
-	public init(onDismiss: (() -> Void)? = nil) {
+	public init(
+		onDismiss: (() -> Void)? = nil,
+		overrides: GratitudeOverrides? = nil
+	) {
 		self.onDismiss = onDismiss
+		self.overrides = overrides
 	}
 
 	/// Use the injected closure if provided (programmatic presentation
@@ -27,6 +32,10 @@ public struct GratitudeSheet: View {
 
 	public var body: some View {
 		let config = gratitude.config
+		let displayHeadline = overrides?.headline ?? config?.headline ?? "Support development"
+		let displayMessage  = overrides?.message  ?? config?.message  ?? ""
+		let navTitle        = overrides?.navigationTitle ?? ""
+		let footer          = overrides?.footer
 
 		NavigationStack {
 			VStack {
@@ -36,10 +45,10 @@ public struct GratitudeSheet: View {
 					artwork(config: config)
 
 					VStack(spacing: 8) {
-						Text(config?.headline ?? "Support development")
+						Text(displayHeadline)
 							.font(.title2.weight(.semibold))
 							.multilineTextAlignment(.center)
-						Text(config?.message ?? "")
+						Text(displayMessage)
 							.font(.body)
 							.foregroundStyle(.secondary)
 							.multilineTextAlignment(.center)
@@ -61,6 +70,14 @@ public struct GratitudeSheet: View {
 							}
 						}
 						.padding(.top, 4)
+					}
+
+					if let footer {
+						Text(footer)
+							.font(.callout)
+							.foregroundStyle(.secondary)
+							.multilineTextAlignment(.center)
+							.fixedSize(horizontal: false, vertical: true)
 					}
 
 					if let config, config.trackGiftCounts {
@@ -92,6 +109,9 @@ public struct GratitudeSheet: View {
 			.toolbarBackground(.hidden, for: .navigationBar)
 			.navigationBarTitleDisplayMode(.inline)
 			#endif
+			#if os(macOS)
+			.navigationTitle(navTitle)
+			#endif
 		}
 		#if os(macOS)
 		.frame(minWidth: 380, minHeight: 360)
@@ -100,12 +120,15 @@ public struct GratitudeSheet: View {
 
 	@ViewBuilder
 	private func artwork(config: GratitudeConfig?) -> some View {
-		if let name = config?.imageName {
+		let resolvedImageName  = overrides?.imageName       ?? config?.imageName
+		let resolvedSystemName = overrides?.systemImageName ?? config?.systemImageName
+
+		if let name = resolvedImageName {
 			Image(name)
 				.resizable()
 				.scaledToFit()
 				.frame(height: 96)
-		} else if let symbol = config?.systemImageName {
+		} else if let symbol = resolvedSystemName {
 			Image(systemName: symbol)
 				.font(.system(size: 56, weight: .regular))
 				.foregroundStyle(config?.accent ?? .accentColor)
