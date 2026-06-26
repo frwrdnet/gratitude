@@ -15,11 +15,11 @@ public struct GratitudeSheet: View {
 	private let overrides: GratitudeOverrides?
 
 	public init(
-		onDismiss: (() -> Void)? = nil,
-		overrides: GratitudeOverrides? = nil
+		overrides: GratitudeOverrides? = nil,
+		onDismiss: (() -> Void)? = nil
 	) {
-		self.onDismiss = onDismiss
 		self.overrides = overrides
+		self.onDismiss = onDismiss
 	}
 
 	/// Use the injected closure if provided (programmatic presentation
