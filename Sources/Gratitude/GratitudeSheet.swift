@@ -59,7 +59,7 @@ public struct GratitudeSheet: View {
 						ProgressView("Loading…").padding(.vertical, 8)
 					} else if gratitude.tiers.isEmpty {
 						Text("No tip tiers configured.")
-							.font(.callout)
+							.font(.body)
 							.foregroundStyle(.secondary)
 					} else {
 						VStack(spacing: 12) {
@@ -74,7 +74,7 @@ public struct GratitudeSheet: View {
 
 					if let footer = config.footer {
 						Text(footer)
-							.font(.callout)
+							.font(.body)
 							.foregroundStyle(.secondary)
 							.multilineTextAlignment(.center)
 							.fixedSize(horizontal: false, vertical: true)
@@ -84,12 +84,13 @@ public struct GratitudeSheet: View {
 						let total = gratitude.totalGiftCount()
 						if total > 0 {
 							Text("You've tipped \(total) time\(total == 1 ? "" : "s") — thank you 🙏")
-								.font(.caption)
+								.font(.body)
 								.foregroundStyle(.secondary)
 						}
 					}
 				}
-				.padding(28)
+				.padding(.horizontal, 48)
+				.padding(.vertical, 24)
 				.frame(maxWidth: 440)
 
 				Spacer(minLength: 0)

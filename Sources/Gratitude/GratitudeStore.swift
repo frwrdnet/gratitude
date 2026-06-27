@@ -129,3 +129,60 @@ public final class GratitudeStore: ObservableObject {
 		ud.set(ud.integer(forKey: Self.totalKey) + 1, forKey: Self.totalKey)
 	}
 }
+
+// MARK: Gift Tier
+
+/// One tap-to-tip option. Mirror an App Store Connect consumable IAP.
+public struct GiftTier: Identifiable, Hashable, Sendable {
+	
+	/// The App Store Connect product identifier
+	/// (e.g. "net.frwrd.nabu.tip.small").
+	public let product: String
+	
+	/// A short emoji or glyph rendered next to the price.
+	public let emoji: String
+	
+	/// Sort position in the modal — lower = first. Ties broken by product id.
+	public let sortOrder: Int
+	
+	public init(product: String, emoji: String, sortOrder: Int = 0) {
+		self.product = product
+		self.emoji = emoji
+		self.sortOrder = sortOrder
+	}
+	
+	public var id: String { product }
+}
+
+// MARK: Gratitude Errors
+
+public enum GratitudeError: LocalizedError {
+	case notConfigured
+	case productNotLoaded(String)
+	case tierNotFound(String)
+	case unknownPurchaseResult
+	
+	public var errorDescription: String? {
+		switch self {
+			case .notConfigured:
+				return "Gratitude.configure(...) was never called."
+			case .productNotLoaded(let id):
+				return "Product not loaded from App Store: \(id)."
+			case .tierNotFound(let id):
+				return "No configured tier for product: \(id)."
+			case .unknownPurchaseResult:
+				return "Unknown StoreKit purchase result."
+		}
+	}
+}
+
+
+// MARK: Purchase Result
+
+public enum PurchaseResult: Sendable {
+	case success(tier: GiftTier)
+	case userCancelled
+	case pending
+	case failed(Error)
+}
+
