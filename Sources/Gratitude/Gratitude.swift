@@ -114,31 +114,40 @@ public final class Gratitude: ObservableObject {
 		let w = width ?? 440
 		let h = height ?? 540
 
+		let resolved = (config ?? GratitudeConfig())
+			.merged(over: self.config ?? GratitudeConfig())
+			.resolved
+
 		let host = NSHostingController(rootView: GratitudeSheet(config: config))
+		let window = NSWindow(
+			contentRect: NSRect(x: 0, y: 0, width: w, height: h),
+			styleMask: [.titled, .closable, .fullSizeContentView],
+			backing: .buffered,
+			defer: false
+		)
+		window.contentViewController = host
+		window.title = resolved.navigationTitle ?? "Send a tip"
+		window.isReleasedWhenClosed = false
+
 		host.rootView = GratitudeSheet(
 			config: config,
-			onDismiss: { [weak host] in host?.dismiss(nil) }
+			onDismiss: { [weak window] in window?.close() }
 		)
 		host.preferredContentSize = NSSize(width: w, height: h)
 
-		if let contentVC = NSApp.keyWindow?.contentViewController {
-			contentVC.presentAsSheet(host)
-		} else {
-			let window = NSWindow(
-				contentRect: NSRect(x: 0, y: 0, width: w, height: h),
-				styleMask: [.titled, .closable, .fullSizeContentView],
-				backing: .buffered,
-				defer: false
+		if let parent = NSApp.keyWindow ?? NSApp.mainWindow {
+			// Mac convention: top edge ~1/3 of the empty vertical space below
+			// the parent's top — mirrors what NSWindow.center() does on the
+			// screen, applied relative to the parent.
+			let origin = NSPoint(
+				x: parent.frame.midX - w / 2,
+				y: parent.frame.maxY - h - (parent.frame.height - h) / 3
 			)
-			window.contentViewController = host
-			let resolved = (config ?? GratitudeConfig())
-				.merged(over: self.config ?? GratitudeConfig())
-				.resolved
-			window.title = resolved.navigationTitle ?? "Send a tip"
+			window.setFrameOrigin(origin)
+		} else {
 			window.center()
-			window.isReleasedWhenClosed = false
-			window.makeKeyAndOrderFront(nil)
 		}
+		window.makeKeyAndOrderFront(nil)
 	}
 	#endif
 }

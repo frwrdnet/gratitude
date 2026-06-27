@@ -37,86 +37,94 @@ public struct GratitudeSheet: View {
 			.merged(over: gratitude.config ?? GratitudeConfig())
 			.resolved
 
-		NavigationStack {
-			VStack {
-				Spacer(minLength: 0)
-
-				VStack(spacing: 20) {
-					artwork(config: config)
-
-					VStack(spacing: 8) {
-						Text(config.headline ?? "")
-							.font(.title2.weight(.semibold))
-							.multilineTextAlignment(.center)
-						Text(config.message ?? "")
-							.font(.body)
-							.foregroundStyle(.secondary)
-							.multilineTextAlignment(.center)
-							.fixedSize(horizontal: false, vertical: true)
-					}
-
-					if store.isLoading {
-						ProgressView("Loading…").padding(.vertical, 8)
-					} else if gratitude.tiers.isEmpty {
-						Text("No tip tiers configured.")
-							.font(.body)
-							.foregroundStyle(.secondary)
-					} else {
-						VStack(spacing: 12) {
-							ForEach(gratitude.tiers) { tier in
-								GiftButton(product: tier.product)
-									.controlSize(.large)
-									.frame(maxWidth: .infinity)
-							}
-						}
-						.padding(.top, 4)
-					}
-
-					if let footer = config.footer {
-						Text(footer)
-							.font(.body)
-							.foregroundStyle(.secondary)
-							.multilineTextAlignment(.center)
-							.fixedSize(horizontal: false, vertical: true)
-					}
-
-					if config.trackGiftCounts == true {
-						let total = gratitude.totalGiftCount()
-						if total > 0 {
-							Text("You've tipped \(total) time\(total == 1 ? "" : "s") — thank you 🙏")
-								.font(.body)
-								.foregroundStyle(.secondary)
-						}
-					}
-				}
-				.padding(.horizontal, 48)
-				.padding(.vertical, 24)
-				.frame(maxWidth: 440)
-
-				Spacer(minLength: 0)
-			}
-			.frame(maxWidth: .infinity, maxHeight: .infinity)
-			.toolbar {
-				ToolbarItem(placement: .cancellationAction) {
-					Button(role: .cancel) {
-						performDismiss()
-					} label: {
-						Image(systemName: "xmark")
-							.fontWeight(.semibold)
-					}
-				}
-			}
-			#if os(iOS)
-			.toolbarBackground(.hidden, for: .navigationBar)
-			.navigationBarTitleDisplayMode(.inline)
-			#endif
-			#if os(macOS)
-			.navigationTitle(config.navigationTitle ?? "")
-			#endif
-		}
 		#if os(macOS)
-		.frame(minWidth: 380, minHeight: 360)
+		// On macOS the standalone NSWindow provides the title bar and a real
+		// close button, so the SwiftUI content is just the body — no
+		// NavigationStack, no toolbar, no in-content close button. This avoids
+		// NavigationStack-in-NSHostingController weirdness (broken title bridge,
+		// responder-chain issues that can swallow Cmd-Q).
+		contentBody(config: config)
+			.frame(minWidth: 380, minHeight: 360)
+		#else
+		NavigationStack {
+			contentBody(config: config)
+				.toolbar {
+					ToolbarItem(placement: .cancellationAction) {
+						Button(role: .cancel) {
+							performDismiss()
+						} label: {
+							Image(systemName: "xmark")
+								.fontWeight(.semibold)
+						}
+					}
+				}
+				.toolbarBackground(.hidden, for: .navigationBar)
+				.navigationBarTitleDisplayMode(.inline)
+				.navigationTitle(config.navigationTitle ?? "")
+		}
 		#endif
+	}
+
+	@ViewBuilder
+	private func contentBody(config: GratitudeConfig) -> some View {
+		VStack {
+			Spacer(minLength: 0)
+
+			VStack(spacing: 20) {
+				artwork(config: config)
+
+				VStack(spacing: 8) {
+					Text(config.headline ?? "")
+						.font(.title2.weight(.semibold))
+						.multilineTextAlignment(.center)
+					Text(config.message ?? "")
+						.font(.body)
+						.foregroundStyle(.secondary)
+						.multilineTextAlignment(.center)
+						.fixedSize(horizontal: false, vertical: true)
+				}
+
+				if store.isLoading {
+					ProgressView("Loading…").padding(.vertical, 8)
+				} else if gratitude.tiers.isEmpty {
+					Text("No tip tiers configured.")
+						.font(.body)
+						.foregroundStyle(.secondary)
+				} else {
+					VStack(spacing: 12) {
+						ForEach(gratitude.tiers) { tier in
+							GiftButton(product: tier.product)
+								.controlSize(.large)
+								.frame(maxWidth: .infinity)
+						}
+					}
+					.padding(.top, 4)
+				}
+
+				if let footer = config.footer {
+					Text(footer)
+						.font(.body)
+						.foregroundStyle(.secondary)
+						.multilineTextAlignment(.center)
+						.fixedSize(horizontal: false, vertical: true)
+				}
+
+				if config.trackGiftCounts == true {
+					let total = gratitude.totalGiftCount()
+					if total > 0 {
+						Text("You've tipped \(total) time\(total == 1 ? "" : "s") — thank you 🙏")
+							.font(.body)
+							.foregroundStyle(.secondary)
+					}
+				}
+			}
+			.padding(.horizontal, 48)
+			.padding(.vertical, 24)
+			.frame(maxWidth: 440)
+
+			Spacer(minLength: 0)
+		}
+		.frame(maxWidth: .infinity, maxHeight: .infinity)
 	}
 
 	@ViewBuilder
