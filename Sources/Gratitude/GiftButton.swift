@@ -35,7 +35,7 @@ public struct GiftButton<S: ButtonStyle>: View {
 					.monospacedDigit()
 				if store.purchasingProduct == product {
 					ProgressView()
-						.controlSize(.small)
+						.controlSize(.mini)
 				}
 			}
 			.contentShape(Rectangle())
