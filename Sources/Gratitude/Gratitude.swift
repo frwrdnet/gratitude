@@ -114,12 +114,17 @@ public final class Gratitude: ObservableObject {
 		let w = width ?? 440
 		let h = height ?? 540
 
+		let resolved = (config ?? GratitudeConfig())
+			.merged(over: self.config ?? GratitudeConfig())
+			.resolved
+
 		let host = NSHostingController(rootView: GratitudeSheet(config: config))
 		host.rootView = GratitudeSheet(
 			config: config,
 			onDismiss: { [weak host] in host?.dismiss(nil) }
 		)
 		host.preferredContentSize = NSSize(width: w, height: h)
+		host.title = resolved.navigationTitle ?? ""
 
 		if let contentVC = NSApp.keyWindow?.contentViewController {
 			contentVC.presentAsSheet(host)
@@ -131,10 +136,7 @@ public final class Gratitude: ObservableObject {
 				defer: false
 			)
 			window.contentViewController = host
-			let resolved = (config ?? GratitudeConfig())
-				.merged(over: self.config ?? GratitudeConfig())
-				.resolved
-			window.title = resolved.navigationTitle ?? "Send a tip"
+			window.title = resolved.navigationTitle ?? ""
 			window.center()
 			window.isReleasedWhenClosed = false
 			window.makeKeyAndOrderFront(nil)

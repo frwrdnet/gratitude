@@ -78,6 +78,7 @@ public struct GratitudeSheet: View {
 							.foregroundStyle(.secondary)
 							.multilineTextAlignment(.center)
 							.fixedSize(horizontal: false, vertical: true)
+							.padding(.bottom, 24)
 					}
 
 					if config.trackGiftCounts == true {

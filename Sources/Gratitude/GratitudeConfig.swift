@@ -62,7 +62,7 @@ public struct GratitudeConfig: Sendable {
 	/// Library defaults. Bottom of the merge stack — any field still nil after
 	/// merging override + global with this gets the value below.
 	public static let `default` = GratitudeConfig(
-		navigationTitle: "Send a tip",
+		navigationTitle: "Gratitude",
 		headline: "Send us a tip",
 		message: "It runs on our time and your goodwill. If it's been useful, send us a little tip.",
 		footer: nil,
