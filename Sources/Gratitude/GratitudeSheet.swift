@@ -98,12 +98,14 @@ public struct GratitudeSheet: View {
 			}
 			.frame(maxWidth: .infinity, maxHeight: .infinity)
 			.toolbar {
-				ToolbarItem(placement: .cancellationAction) {
-					Button(role: .cancel) {
-						performDismiss()
-					} label: {
-						Image(systemName: "xmark")
-							.fontWeight(.semibold)
+				if config.showsCloseButton != false {
+					ToolbarItem(placement: .cancellationAction) {
+						Button(role: .cancel) {
+							performDismiss()
+						} label: {
+							Image(systemName: "xmark")
+								.fontWeight(.semibold)
+						}
 					}
 				}
 			}

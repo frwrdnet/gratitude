@@ -46,7 +46,8 @@ public struct GratitudeConfig: Sendable {
 		imageName: String? = nil,
 		systemImageName: String? = nil,
 		accent: Color? = nil,
-		trackGiftCounts: Bool? = nil
+		trackGiftCounts: Bool? = nil,
+        showsCloseButton: Bool? = nil
 	) {
 		self.navigationTitle = navigationTitle
 		self.headline = headline
@@ -57,6 +58,7 @@ public struct GratitudeConfig: Sendable {
 		self.systemImageName = systemImageName
 		self.accent = accent
 		self.trackGiftCounts = trackGiftCounts
+		self.showsCloseButton = showsCloseButton
 	}
 
 	/// Library defaults. Bottom of the merge stack — any field still nil after
@@ -70,21 +72,23 @@ public struct GratitudeConfig: Sendable {
 		imageName: nil,
 		systemImageName: nil,
 		accent: .pink,
-		trackGiftCounts: false
+		trackGiftCounts: false,
+        showsCloseButton: true
 	)
 
 	/// Returns a new config where every nil field in `self` is filled from `fallback`.
 	public func merged(over fallback: GratitudeConfig) -> GratitudeConfig {
 		GratitudeConfig(
-			navigationTitle: self.navigationTitle ?? fallback.navigationTitle,
-			headline:        self.headline        ?? fallback.headline,
-			message:         self.message         ?? fallback.message,
-			footer:          self.footer          ?? fallback.footer,
-			emoji:           self.emoji           ?? fallback.emoji,
-			imageName:       self.imageName       ?? fallback.imageName,
-			systemImageName: self.systemImageName ?? fallback.systemImageName,
-			accent:          self.accent          ?? fallback.accent,
-			trackGiftCounts: self.trackGiftCounts ?? fallback.trackGiftCounts
+			navigationTitle:	self.navigationTitle 	?? fallback.navigationTitle,
+			headline:        	self.headline        	?? fallback.headline,
+			message:         	self.message         	?? fallback.message,
+			footer:          	self.footer          	?? fallback.footer,
+			emoji:           	self.emoji           	?? fallback.emoji,
+			imageName:       	self.imageName       	?? fallback.imageName,
+			systemImageName: 	self.systemImageName 	?? fallback.systemImageName,
+			accent:          	self.accent          	?? fallback.accent,
+			trackGiftCounts: 	self.trackGiftCounts 	?? fallback.trackGiftCounts,
+			showsCloseButton: 	self.showsCloseButton 	?? fallback.showsCloseButton
 		)
 	}
 
