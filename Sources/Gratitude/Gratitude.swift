@@ -127,8 +127,25 @@ public final class Gratitude: ObservableObject {
 		host.title = resolved.navigationTitle ?? ""
 
 		if let contentVC = NSApp.keyWindow?.contentViewController {
+			// Sheet: no title bar, so it must keep the × to be closable.
+			let host = NSHostingController(rootView: GratitudeSheet(config: config))
+			host.rootView = GratitudeSheet(
+				config: config,
+				showsCloseButton: true,
+				onDismiss: { [weak host] in host?.dismiss(nil) }
+			)
+			host.preferredContentSize = NSSize(width: w, height: h)
+			host.title = resolved.navigationTitle ?? ""
 			contentVC.presentAsSheet(host)
 		} else {
+			// Standalone window: has its own title-bar close button, so hide the ×.
+			let host = NSHostingController(rootView: GratitudeSheet(
+				config: config,
+				showsCloseButton: false
+			))
+			host.preferredContentSize = NSSize(width: w, height: h)
+			host.title = resolved.navigationTitle ?? ""
+
 			let window = NSWindow(
 				contentRect: NSRect(x: 0, y: 0, width: w, height: h),
 				styleMask: [.titled, .closable, .fullSizeContentView],

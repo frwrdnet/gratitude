@@ -37,10 +37,6 @@ public struct GratitudeConfig: Sendable {
 	/// and `gratitude.count.__total`.
 	public var trackGiftCounts: Bool?
 
-	/// Show the modal's × close button. Default true. Set false when the
-    /// modal is a standalone window that already has a title-bar close button.
-    public var showsCloseButton: Bool?
-
 	public init(
 		navigationTitle: String? = nil,
 		headline: String? = nil,
@@ -50,8 +46,7 @@ public struct GratitudeConfig: Sendable {
 		imageName: String? = nil,
 		systemImageName: String? = nil,
 		accent: Color? = nil,
-		trackGiftCounts: Bool? = nil,
-        showsCloseButton: Bool? = nil
+		trackGiftCounts: Bool? = nil
 	) {
 		self.navigationTitle = navigationTitle
 		self.headline = headline
@@ -62,7 +57,6 @@ public struct GratitudeConfig: Sendable {
 		self.systemImageName = systemImageName
 		self.accent = accent
 		self.trackGiftCounts = trackGiftCounts
-		self.showsCloseButton = showsCloseButton
 	}
 
 	/// Library defaults. Bottom of the merge stack — any field still nil after
@@ -76,8 +70,7 @@ public struct GratitudeConfig: Sendable {
 		imageName: nil,
 		systemImageName: nil,
 		accent: .pink,
-		trackGiftCounts: false,
-        showsCloseButton: true
+		trackGiftCounts: false
 	)
 
 	/// Returns a new config where every nil field in `self` is filled from `fallback`.
@@ -91,8 +84,7 @@ public struct GratitudeConfig: Sendable {
 			imageName:       	self.imageName       	?? fallback.imageName,
 			systemImageName: 	self.systemImageName 	?? fallback.systemImageName,
 			accent:          	self.accent          	?? fallback.accent,
-			trackGiftCounts: 	self.trackGiftCounts 	?? fallback.trackGiftCounts,
-			showsCloseButton: 	self.showsCloseButton 	?? fallback.showsCloseButton
+			trackGiftCounts: 	self.trackGiftCounts 	?? fallback.trackGiftCounts
 		)
 	}
 

@@ -14,11 +14,17 @@ public struct GratitudeSheet: View {
 	private let configOverride: GratitudeConfig?
 	private let onDismiss: (() -> Void)?
 
+	/// Show the modal's × close button. Default true. Set false when the
+    /// modal is a standalone window that already has a title-bar close button.
+    private let showsCloseButton: Bool
+
 	public init(
 		config: GratitudeConfig? = nil,
+		showsCloseButton: Bool = true,
 		onDismiss: (() -> Void)? = nil
 	) {
 		self.configOverride = config
+		self.showsCloseButton = showsCloseButton
 		self.onDismiss = onDismiss
 	}
 
@@ -98,7 +104,7 @@ public struct GratitudeSheet: View {
 			}
 			.frame(maxWidth: .infinity, maxHeight: .infinity)
 			.toolbar {
-				if config.showsCloseButton != false {
+				if showsCloseButton {
 					ToolbarItem(placement: .cancellationAction) {
 						Button(role: .cancel) {
 							performDismiss()
