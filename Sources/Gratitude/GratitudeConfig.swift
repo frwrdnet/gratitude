@@ -37,6 +37,10 @@ public struct GratitudeConfig: Sendable {
 	/// and `gratitude.count.__total`.
 	public var trackGiftCounts: Bool?
 
+	/// Show the modal's × close button. Default true. Set false when the
+    /// modal is a standalone window that already has a title-bar close button.
+    public var showsCloseButton: Bool?
+
 	public init(
 		navigationTitle: String? = nil,
 		headline: String? = nil,
