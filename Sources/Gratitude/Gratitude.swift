@@ -137,8 +137,16 @@ public final class Gratitude: ObservableObject {
 			)
 			window.contentViewController = host
 			window.title = resolved.navigationTitle ?? ""
-			window.center()
 			window.isReleasedWhenClosed = false
+			window.setContentSize(NSSize(width: w, height: h))
+			let screen = NSScreen.screens.first { NSMouseInRect(NSEvent.mouseLocation, $0.frame, false) } ?? NSScreen.main
+			if let visible = screen?.visibleFrame {
+				let size = window.frame.size
+				window.setFrameOrigin(NSPoint(x: visible.midX - size.width / 2,
+				                              y: visible.midY - size.height / 2))
+			} else {
+				window.center()
+			}
 			window.makeKeyAndOrderFront(nil)
 		}
 	}
